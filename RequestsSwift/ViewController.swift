@@ -12,14 +12,38 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        obtainUser()
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    func obtainUser() {
+        
+        guard let url = URL(string: "http://jsonplaceholder.typicode.com/users/1") else { return }
+        
+            var urlRequest = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 10)
+        
+            urlRequest.httpMethod = "GET"
+        
+            let session = URLSession.shared
+        
+            let task = session.dataTask(with: urlRequest, completionHandler: { (data, response, error) in
+                
+                if error != nil {
+                    
+                    print("Error: \(String(describing: error?.localizedDescription))")
+                }
+                else {
+                    
+                    guard let data = data else { return }
+                    
+                    if let model = try? JSONDecoder().decode(UserModel.self, from: data) {
+                        print("Data: \(String(describing: model))")
+                    }
+                }
+            })
+            
+            task.resume()
     }
-
 
 }
 
