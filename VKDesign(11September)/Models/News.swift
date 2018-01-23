@@ -11,7 +11,7 @@ import UIKit
 class News: NSObject, NSCoding, HasIdProtocol {
 
     @objc var text: String?
-    @objc var image: UIImage?
+    @objc var image: String?
     @objc var likesCount: String
     @objc var commentsCount: String
     @objc var repostsCount: String
@@ -21,7 +21,8 @@ class News: NSObject, NSCoding, HasIdProtocol {
     @objc var id: String
     var user_id: Int
     
-    init(text: String?, image: UIImage?, likesCount: String, commentsCount: String, repostsCount: String, name: String, surname: String, date: String, id: String, user_id: Int) {
+    
+    init(text: String?, image: String?, likesCount: String, commentsCount: String, repostsCount: String, name: String, surname: String, date: String, id: String, user_id: Int) {
         
         self.text = text
         self.image = image
@@ -35,7 +36,7 @@ class News: NSObject, NSCoding, HasIdProtocol {
         self.user_id = user_id
     }
     
-    init(text: String?, image: UIImage?, likesCount: String, commentsCount: String, repostsCount: String, name: String, surname: String, date: String, id: String) {
+    init(text: String?, image: String?, likesCount: String, commentsCount: String, repostsCount: String, name: String, surname: String, date: String, id: String) {
         
         self.text = text
         self.image = image
@@ -51,9 +52,9 @@ class News: NSObject, NSCoding, HasIdProtocol {
     
     func toNews(with news: UserNews ) -> News {
         
-        if let imageData = news.image {
-            image = UIImage(data: imageData as Data)
-        }
+//        if let imageData = news.image {
+//            image = UIImage(data: imageData as Data)
+//        }
         
         let news =  News(text: news.text, image: image, likesCount: news.likesCount!, commentsCount: news.commentsCount!, repostsCount: news.repostsCount!, name: news.name!, surname: news.surname!, date: news.date!, id: "0")
         
@@ -75,7 +76,7 @@ class News: NSObject, NSCoding, HasIdProtocol {
     
     required convenience init?(coder aDecoder: NSCoder) {
         let text = aDecoder.decodeObject(forKey: #keyPath(News.text)) as? String
-        let image = aDecoder.decodeObject(forKey: #keyPath(News.image)) as? UIImage 
+        let image = aDecoder.decodeObject(forKey: #keyPath(News.image)) as? String
         guard let likesCount = aDecoder.decodeObject(forKey: #keyPath(News.likesCount)) as? String else { return nil }
         guard let commentsCount = aDecoder.decodeObject(forKey: #keyPath(News.commentsCount)) as? String else { return nil }
         guard let repostsCount = aDecoder.decodeObject(forKey: #keyPath(News.repostsCount)) as? String else { return nil }

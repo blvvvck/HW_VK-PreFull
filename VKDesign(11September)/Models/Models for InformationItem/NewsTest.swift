@@ -21,7 +21,7 @@ struct NewsTest: Codable {
                 }
                 let photo: Photo?
             }
-            let attachments: [Attachments]
+            let attachments: [Attachments]?
             
             struct Likes: Codable {
                 let count: Int

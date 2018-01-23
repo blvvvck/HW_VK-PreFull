@@ -70,9 +70,9 @@ class DataManager: WorkWithDataProtocol {
         
             var imageData = Data()
         
-            if let image = createdNews.image, let createdImageData = UIImageJPEGRepresentation(image, 1){
-                imageData = createdImageData
-            }
+//            if let image = createdNews.image, let createdImageData = UIImageJPEGRepresentation(image, 1){
+//                imageData = createdImageData
+//            }
             
             news.commentsCount = createdNews.commentsCount
             news.date = createdNews.date
@@ -209,7 +209,7 @@ class DataManager: WorkWithDataProtocol {
             image = UIImage(data: imageData as Data)
         }
         
-        let news =  News(text: news.text, image: image, likesCount: news.likesCount!, commentsCount: news.commentsCount!, repostsCount: news.repostsCount!, name: news.name!, surname: news.surname!, date: news.date!, id: "0")
+        let news =  News(text: news.text, image: "image", likesCount: news.likesCount!, commentsCount: news.commentsCount!, repostsCount: news.repostsCount!, name: news.name!, surname: news.surname!, date: news.date!, id: "0")
         
         return news
     }

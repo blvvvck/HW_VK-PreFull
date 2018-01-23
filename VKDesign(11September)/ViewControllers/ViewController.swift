@@ -79,6 +79,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     var userRegistration = UserRegistration(id: 0, name: "", surname: "", gender: "", email: "", phoneNumber: "", age: "", city: "", password: "")
     var photoUrl = ""
     let requestManager = RequestManager.instance
+    var refreshControl:UIRefreshControl!
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -95,19 +97,20 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         bottomAboutCollectionViewBorder()
         bottomUserPhotosCollectionViewBorder()
         initInfo()
-        randomNews()
+        createRefreshControl()
         initNews()
-        
-        
     }
-    
+
     func initInfo() {
         if  userRegistration.name != ""  {
             nameLabel.text = userRegistration.name
             surnameLabel.text = userRegistration.surname
             locationLabel.text = userRegistration.city
             ageLabel.text = "\(userRegistration.age) years old,"
-            avatar.downloadedFrom(link: photoUrl)
+            DispatchQueue.main.async() {
+                self.avatar.downloadedFrom(link: self.photoUrl)
+            }
+            
         } else {
             randomAge()
             randomName()
@@ -117,46 +120,38 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     func initNews() {
-////        guard let currentNews: [News] = newsManager.getUsersNews(with: userRegistration.id) else { return }
-////        news = currentNews
-        requestManager.getNews { (newsTest) in
-            for newsVk in newsTest.response.items {
-                let imageView = UIImageView(frame: CGRect(x:0, y:0, width:305, height:154))
-
-                if let photoString = newsVk.attachments.first?.photo?.photo_130 {
-                    imageView.downloadedFrom(link: photoString)
+            self.requestManager.getNews { (newsTest) in
+                self.news.removeAll()
+                for newsVk in newsTest.response.items {
+                    
+                    DispatchQueue.main.async {
+                        var newsModel = News(text: newsVk.text,image: newsVk.attachments?.first?.photo?.photo_130, likesCount: String(newsVk.likes.count), commentsCount: String(newsVk.comments.count), repostsCount: String(newsVk.reposts.count), name: self.nameLabel.text!, surname: self.surnameLabel.text!, date: self.newsDateArray[Int(arc4random_uniform(UInt32(self.newsDateArray.count)))] , id: String(newsVk.id))
+                        self.news.append(newsModel)
+                    }
+      
                 }
-                
-                var newsModel = News(text: newsVk.text,image: imageView.image, likesCount: String(newsVk.likes.count), commentsCount: String(newsVk.comments.count), repostsCount: String(newsVk.reposts.count), name: self.nameLabel.text!, surname: self.surnameLabel.text!, date: self.newsDateArray[Int(arc4random_uniform(UInt32(self.newsDateArray.count)))] , id: String(newsVk.id))
-                self.news.append(newsModel)
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                 }
-                
             }
-        }
-        
+    }
+    
+    private func createRefreshControl() {
+        refreshControl = UIRefreshControl()
+        refreshControl?.attributedTitle = NSAttributedString(string: "Pull to refresh")
+        refreshControl?.addTarget(self, action: #selector(refresh), for: .valueChanged)
+        tableView.addSubview(refreshControl)
+    }
+    
+    @objc private func refresh() {
+        initNews()
+        //self.tableView.reloadData()
+        self.refreshControl?.endRefreshing()
     }
     
     func prepareForDynamicCellSize() {
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = estimatedNewsCellHeight
-    }
-    
-    func randomNews() {
-        let keyForRandomNews = "isAlreadyCreated"
-        
-        let checker =  UserDefaults.standard.bool(forKey: keyForRandomNews)
-        
-        guard checker == false else { return }
-        
-        let news1 = News(text: nil, image: newsImageArray[0], likesCount: newsLikesArray[0], commentsCount:newsCommentsArray[0], repostsCount: newsRepostsArray[0], name: nameLabel.text!, surname: surnameLabel.text!, date: newsDateArray[Int(arc4random_uniform(UInt32(newsDateArray.count)))], id: UUID().uuidString, user_id: userRegistration.id )
-        let news2 = News(text: newsTextArray[1], image: nil, likesCount: newsLikesArray[1], commentsCount:newsCommentsArray[1], repostsCount: newsRepostsArray[1], name: nameLabel.text!, surname: surnameLabel.text!, date: newsDateArray[Int(arc4random_uniform(UInt32(newsDateArray.count)))], id: UUID().uuidString, user_id: userRegistration.id)
-        let news3 = News(text: newsTextArray[2], image: newsImageArray[2], likesCount: newsLikesArray[2], commentsCount:newsCommentsArray[2], repostsCount: newsRepostsArray[2], name: nameLabel.text!, surname: surnameLabel.text!, date: newsDateArray[Int(arc4random_uniform(UInt32(newsDateArray.count)))], id: UUID().uuidString, user_id: userRegistration.id)
-        
-        testID = news3.id
-        
-        UserDefaults.standard.set(true, forKey: keyForRandomNews)
     }
     
     //MARK: Register custom cell
@@ -261,18 +256,28 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     //MARK: DataTransferProtocol
     
     func didPressDone(with note: String) {
-        let tempNews = News(text: note, image: newsImageArray[Int(arc4random_uniform(UInt32(newsImageArray.count)))], likesCount: newsLikesArray[Int(arc4random_uniform(UInt32(newsLikesArray.count)))], commentsCount: newsCommentsArray[Int(arc4random_uniform(UInt32(newsCommentsArray.count)))], repostsCount: newsRepostsArray[Int(arc4random_uniform(UInt32(newsRepostsArray.count)))], name: nameLabel.text!, surname: surnameLabel.text!, date: newsDateArray[Int(arc4random_uniform(UInt32(newsDateArray.count)))], id: UUID().uuidString, user_id: userRegistration.id)
+        let tempNews = News(text: note, image: "", likesCount: newsLikesArray[Int(arc4random_uniform(UInt32(newsLikesArray.count)))], commentsCount: newsCommentsArray[Int(arc4random_uniform(UInt32(newsCommentsArray.count)))], repostsCount: newsRepostsArray[Int(arc4random_uniform(UInt32(newsRepostsArray.count)))], name: nameLabel.text!, surname: surnameLabel.text!, date: newsDateArray[Int(arc4random_uniform(UInt32(newsDateArray.count)))], id: UUID().uuidString, user_id: userRegistration.id)
         
-        newsManager.asyncSave(with: tempNews) {[weak self] (isSaved) in
-            guard let strongSelf = self else { return }
-            if (isSaved) {
-                strongSelf.news = strongSelf.newsManager.syncGetAll()!
-
-                    DispatchQueue.main.async {
-                        strongSelf.tableView.reloadData()
-                    }
-                }
+        
+        requestManager.postNews(with: note) { (result) in
+            if result == true {
+                self.initNews()
             }
+            if result == false {
+                self.initNews()
+            }
+        }
+        
+//        newsManager.asyncSave(with: tempNews) {[weak self] (isSaved) in
+//            guard let strongSelf = self else { return }
+//            if (isSaved) {
+//                strongSelf.news = strongSelf.newsManager.syncGetAll()!
+//
+//                    DispatchQueue.main.async {
+//                        strongSelf.tableView.reloadData()
+//                    }
+//                }
+//            }
         }
 
     
@@ -290,10 +295,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: noteCellIdentifier) as! NewsTableViewCell
+        cell.delegate = self
         
-        let newsModel = news.reversed()[indexPath.row]
+        let newsModel = news[indexPath.row]
         
         cell.prepare(with: newsModel)
+        cell.userAvatarImage.downloadedFrom(link: photoUrl)
+        cell.prepareForReuse()
         
         return cell
     }
@@ -360,6 +368,19 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
+}
+
+extension ViewController: NewsTableDelegate {
+    func didTapLike(with id: Int) {
+        requestManager.isLiked(with: id) { (result) in
+            if result == 0 {
+                self.requestManager.likePost(with: id)
+            }
+            if result == 1 {
+                self.requestManager.unLikePost(with: id)
+            }
+        }
+    }
 }
 
 

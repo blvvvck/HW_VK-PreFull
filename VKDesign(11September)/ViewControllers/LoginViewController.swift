@@ -29,7 +29,7 @@ class LoginViewController: UIViewController, UIWebViewDelegate {
         hideKeyboardWhenTappedAround()
         self.authWebView.delegate = self
         
-        let url = URL(string: "https://oauth.vk.com/authorize?client_id=6342746&display=page&redirect_uri=https://oauth.vk.com/blank.html&scope=friends&response_type=token&v=5.52")
+        let url = URL(string: "https://oauth.vk.com/authorize?client_id=6343752&display=page&redirect_uri=https://oauth.vk.com/blank.html&scope=friends,wall&response_type=token&v=5.52")
         if let unwrappedURL = url {
             
             let request = URLRequest(url: unwrappedURL)
@@ -61,12 +61,9 @@ class LoginViewController: UIViewController, UIWebViewDelegate {
     func webViewDidFinishLoad(_ webView: UIWebView) {
         
         var user = [AnyHashable: Any]()
-        //смотрим на адрес открытой станицы
         let currentURL: String? = webView.request?.url?.absoluteString
         var textRange: NSRange? = (currentURL?.lowercased() as NSString?)?.range(of: "access_token".lowercased())
-        //смотрим, содержится ли в адресе информация о токене
         if textRange?.location != NSNotFound {
-            //Ура, содержится, вытягиваем ее
             let data = currentURL?.components(separatedBy: CharacterSet(charactersIn: "=&"))
             user["access_token"] = data?[1]
             print(data?[1])
@@ -89,20 +86,13 @@ class LoginViewController: UIViewController, UIWebViewDelegate {
                 
                 self.requestManager.getAvatar(completionBlock: { (url) in
                     viewController.photoUrl = url
-                    //viewController.avatar.downloadedFrom(link: url)
                 })
-                //viewController.avatar.downloadedFrom(link: <#T##String#>)
                 self.present(navViewController, animated: true, completion: nil)
             })
-            
-            
         }
     }
 
-    
-
     @IBAction func loginButtonPressed(_ sender: Any) {
-        
         
         if let password = passwordTextField.text {
             user_password = password
